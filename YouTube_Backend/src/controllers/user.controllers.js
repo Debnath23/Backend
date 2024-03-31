@@ -300,10 +300,6 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 
   const unUpdatedUser = await User.findById(req.user?._id).select("avatar")
 
-  if (unUpdatedUser.avatar) {
-    deleteFromCloudinary(unUpdatedUser.avatar)
-  }
-
   const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
@@ -313,6 +309,10 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     },
     { new: true }
   ).select("-password");
+
+  if (unUpdatedUser.avatar) {
+    await deleteFromCloudinary(unUpdatedUser.avatar)
+  }
 
   return res
     .status(200)
