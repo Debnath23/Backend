@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.models.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 
@@ -296,6 +296,12 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 
   if (!avatar.url) {
     throw new ApiError(400, "Error while uploading on avatar");
+  }
+
+  const unUpdatedUser = await User.findById(req.user?._id).select("avatar")
+
+  if (unUpdatedUser.avatar) {
+    deleteFromCloudinary(unUpdatedUser.avatar)
   }
 
   const user = await User.findByIdAndUpdate(
